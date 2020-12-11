@@ -1,0 +1,12 @@
+apiVersion: v1
+entries:
+  turing:
+  - apiVersion: v1
+    created: "2020-12-11T06:16:27.143559226Z"
+    description: 'Turing: ML Experimentation System'
+    digest: cfb1f2c301a676dbd5048d6bdb0142cf3d3fe03bf47e35553f0354f9b293c19d
+    name: turing
+    urls:
+    - https://github.com/gojek/turing/releases/download/turing-chart-0.1.0/turing-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-12-11T06:16:26.692287168Z"
