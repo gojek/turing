@@ -2,11 +2,11 @@ apiVersion: v1
 entries:
   turing:
   - apiVersion: v1
-    created: "2021-06-11T02:12:58.046832753Z"
+    created: "2021-07-06T08:25:11.427488828Z"
     description: 'Turing: ML Experimentation System'
-    digest: de9e801dc23f126e45ede2112fb44296fc97d4e5be47a1028e0a9980e5306b75
+    digest: fbe44468430b72ea25a5cd72bb445156adb41a1c6b915ffb4cf2b5896eb08e35
     name: turing
     urls:
-    - https://github.com/gojek/turing/releases/download/turing-chart-0.1.1/turing-0.1.1.tgz
-    version: 0.1.1
-generated: "2021-06-11T02:12:57.921254843Z"
+    - https://github.com/gojek/turing/releases/download/turing-chart-0.1.2/turing-0.1.2.tgz
+    version: 0.1.2
+generated: "2021-07-06T08:25:11.173830352Z"
