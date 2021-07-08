@@ -61,6 +61,7 @@ func TestNewAppContext(t *testing.T) {
 			MaxMemory:       config.Quantity(resource.MustParse("100Mi")),
 		},
 		EnsemblingJobConfig: &config.EnsemblingJobConfig{
+			Enabled:                        true,
 			DefaultEnvironment:             "dev",
 			RecordsToProcessInOneIteration: 10,
 			MaxRetryCount:                  3,

@@ -166,6 +166,7 @@ DbConfig:
 DeployConfig:
   EnvironmentType: dev 
 EnsemblingJobConfig:
+  Enabled: true
   DefaultEnvironment: dev
   RecordsToProcessInOneIteration: 10
   MaxRetryCount: 3
