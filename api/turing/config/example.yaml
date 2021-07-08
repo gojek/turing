@@ -48,6 +48,7 @@ NewRelic:
 
 # Ensembling job config
 EnsemblingJobConfig:
+  Enabled: true
   DefaultEnvironment: dev
   RecordsToProcessInOneIteration: 10
   MaxRetryCount: 3

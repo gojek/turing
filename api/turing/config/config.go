@@ -124,6 +124,8 @@ type KubernetesLabelConfigs struct {
 
 // EnsemblingJobConfig captures the config related to the ensembling batch jobs.
 type EnsemblingJobConfig struct {
+	// Enabled is a switch to enable/disable batch ensembling.
+	Enabled bool
 	// RecordsToProcessInOneIteration dictates the number of batch ensembling jobs to be queried at once.
 	RecordsToProcessInOneIteration int `validate:"required"`
 	// MaxRetryCount is the number of retries the batch ensembler runner should try before giving up.
