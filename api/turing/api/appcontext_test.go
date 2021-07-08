@@ -16,6 +16,7 @@ import (
 	"github.com/gojek/turing/api/turing/imagebuilder"
 	"github.com/gojek/turing/api/turing/middleware"
 	"github.com/gojek/turing/api/turing/middleware/mocks"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/gojek/turing/api/turing/service"
 	svcmocks "github.com/gojek/turing/api/turing/service/mocks"
 	"github.com/jinzhu/gorm"
@@ -84,6 +85,18 @@ func TestNewAppContext(t *testing.T) {
 						CPU:    "500m",
 						Memory: "1Gi",
 					},
+				},
+			},
+			DefaultConfigurations: config.DefaultEnsemblingJobConfigurations{
+				BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
+					DriverCPURequest:      "1",
+					DriverMemoryRequest:   "1Gi",
+					ExecutorReplica:       2,
+					ExecutorCPURequest:    "1",
+					ExecutorMemoryRequest: "1Gi",
+				},
+				SparkConfigAnnotations: map[string]string{
+					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
 				},
 			},
 		},
@@ -251,7 +264,11 @@ func TestNewAppContext(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	ensemblingJobService := service.NewEnsemblingJobService(nil, testCfg.EnsemblingJobConfig.DefaultEnvironment)
+	ensemblingJobService := service.NewEnsemblingJobService(
+		nil,
+		testCfg.EnsemblingJobConfig.DefaultEnvironment,
+		testCfg.EnsemblingJobConfig.DefaultConfigurations,
+	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		nil,
 		mlpSvc,

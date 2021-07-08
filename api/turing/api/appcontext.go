@@ -103,7 +103,11 @@ func NewAppContext(
 		cfg.KubernetesLabelConfigs.Environment,
 	)
 
-	ensemblingJobService := service.NewEnsemblingJobService(db, cfg.EnsemblingJobConfig.DefaultEnvironment)
+	ensemblingJobService := service.NewEnsemblingJobService(
+		db,
+		cfg.EnsemblingJobConfig.DefaultEnvironment,
+		cfg.EnsemblingJobConfig.DefaultConfigurations,
+	)
 	batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 		batchClusterController,
 		mlpSvc,

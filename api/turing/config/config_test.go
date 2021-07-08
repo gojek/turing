@@ -14,6 +14,7 @@ import (
 	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
 	tu "github.com/gojek/turing/api/turing/internal/testutils"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -546,6 +547,18 @@ func TestConfigValidate(t *testing.T) {
 						CPU:    "500m",
 						Memory: "1Gi",
 					},
+				},
+			},
+			DefaultConfigurations: DefaultEnsemblingJobConfigurations{
+				BatchEnsemblingJobResources: models.BatchEnsemblingJobResources{
+					DriverCPURequest:      "1",
+					DriverMemoryRequest:   "1Gi",
+					ExecutorReplica:       2,
+					ExecutorCPURequest:    "1",
+					ExecutorMemoryRequest: "1Gi",
+				},
+				SparkConfigAnnotations: map[string]string{
+					"spark/spark.sql.execution.arrow.pyspark.enabled": "true",
 				},
 			},
 		},
