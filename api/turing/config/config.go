@@ -136,7 +136,7 @@ type EnsemblingJobConfig struct {
 	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
 	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
 	// DefaultConfigurations contains the default configurations applied to the ensembling job.
-	// The user is free to override/append to the configuration
+	// The user (the person who calls the API) is free to override/append the default values.
 	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
 }
 

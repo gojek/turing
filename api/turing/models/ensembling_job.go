@@ -57,7 +57,7 @@ type InfraConfig struct {
 	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
 	ServiceAccountName string                       `json:"service_account_name" validate:"required"`
-	Resources          *BatchEnsemblingJobResources `json:"resources" validate:"required"`
+	Resources          *BatchEnsemblingJobResources `json:"resources"`
 }
 
 // Value returns json value, implement driver.Valuer interface
