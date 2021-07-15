@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gojek/mlp/pkg/instrumentation/newrelic"
 	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+	"github.com/gojek/turing/api/turing/models"
 	"github.com/mitchellh/mapstructure"
 
 	// Using a maintained fork of https://github.com/spf13/viper mainly so that viper.AllSettings()
@@ -134,6 +135,17 @@ type EnsemblingJobConfig struct {
 	KanikoConfig KanikoConfig `validate:"required"`
 	// ImageBuilderConfig contains the configuration related to the built ensembler image itself.
 	ImageBuilderConfig ImageBuilderConfig `validate:"required"`
+	// DefaultConfigurations contains the default configurations applied to the ensembling job.
+	// The user (the person who calls the API) is free to override/append the default values.
+	DefaultConfigurations DefaultEnsemblingJobConfigurations `validate:"required"`
+}
+
+// DefaultEnsemblingJobConfigurations contains the default configurations applied to the ensembling job.
+type DefaultEnsemblingJobConfigurations struct {
+	// BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
+	BatchEnsemblingJobResources models.BatchEnsemblingJobResources
+	// SparkConfigAnnotations contains the Spark configurations
+	SparkConfigAnnotations map[string]string
 }
 
 // ImageBuilderConfig provides the configuration used for the OCI image building.
@@ -306,7 +318,7 @@ type MLPConfig struct {
 //
 // Refer to example.yaml for an example of config file.
 func Load(filepaths ...string) (*Config, error) {
-	v := viper.New()
+	v := viper.NewWithOptions(viper.KeyDelimiter("::"))
 
 	// Load default config values
 	setDefaultValues(v)
@@ -323,7 +335,7 @@ func Load(filepaths ...string) (*Config, error) {
 	// Load config values from environment variables.
 	// Nested keys in the config is represented by variable name separated by '_'.
 	// For example, DbConfig.Host can be set from environment variable DBCONFIG_HOST.
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.SetEnvKeyReplacer(strings.NewReplacer("::", "_"))
 	v.AutomaticEnv()
 
 	config := &Config{}
@@ -358,54 +370,54 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("AllowedOrigins", "*")
 
-	v.SetDefault("AuthConfig.Enabled", "false")
-	v.SetDefault("AuthConfig.URL", "")
+	v.SetDefault("AuthConfig::Enabled", "false")
+	v.SetDefault("AuthConfig::URL", "")
 
-	v.SetDefault("DbConfig.Host", "localhost")
-	v.SetDefault("DbConfig.Port", "5432")
-	v.SetDefault("DbConfig.User", "")
-	v.SetDefault("DbConfig.Password", "")
-	v.SetDefault("DbConfig.Database", "turing")
+	v.SetDefault("DbConfig::Host", "localhost")
+	v.SetDefault("DbConfig::Port", "5432")
+	v.SetDefault("DbConfig::User", "")
+	v.SetDefault("DbConfig::Password", "")
+	v.SetDefault("DbConfig::Database", "turing")
 
-	v.SetDefault("DeployConfig.EnvironmentType", "")
-	v.SetDefault("DeployConfig.GcpProject", "")
-	v.SetDefault("DeployConfig.Timeout", "3m")
-	v.SetDefault("DeployConfig.DeletionTimeout", "1m")
-	v.SetDefault("DeployConfig.MaxCPU", "4")
-	v.SetDefault("DeployConfig.MaxMemory", "8Gi")
+	v.SetDefault("DeployConfig::EnvironmentType", "")
+	v.SetDefault("DeployConfig::GcpProject", "")
+	v.SetDefault("DeployConfig::Timeout", "3m")
+	v.SetDefault("DeployConfig::DeletionTimeout", "1m")
+	v.SetDefault("DeployConfig::MaxCPU", "4")
+	v.SetDefault("DeployConfig::MaxMemory", "8Gi")
 
-	v.SetDefault("RouterDefaults.Image", "")
-	v.SetDefault("RouterDefaults.FiberDebugLogEnabled", "false")
-	v.SetDefault("RouterDefaults.CustomMetricsEnabled", "false")
-	v.SetDefault("RouterDefaults.JaegerEnabled", "false")
-	v.SetDefault("RouterDefaults.JaegerCollectorEndpoint", "")
-	v.SetDefault("RouterDefaults.LogLevel", "INFO")
-	v.SetDefault("RouterDefaults.FluentdConfig.Image", "")
-	v.SetDefault("RouterDefaults.FluentdConfig.Tag", "turing-result.log")
-	v.SetDefault("RouterDefaults.FluentdConfig.FlushIntervalSeconds", "90")
-	v.SetDefault("RouterDefaults.Experiment", map[string]interface{}{})
+	v.SetDefault("RouterDefaults::Image", "")
+	v.SetDefault("RouterDefaults::FiberDebugLogEnabled", "false")
+	v.SetDefault("RouterDefaults::CustomMetricsEnabled", "false")
+	v.SetDefault("RouterDefaults::JaegerEnabled", "false")
+	v.SetDefault("RouterDefaults::JaegerCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults::LogLevel", "INFO")
+	v.SetDefault("RouterDefaults::FluentdConfig::Image", "")
+	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")
+	v.SetDefault("RouterDefaults::FluentdConfig::FlushIntervalSeconds", "90")
+	v.SetDefault("RouterDefaults::Experiment", map[string]interface{}{})
 
-	v.SetDefault("Sentry.Enabled", "false")
-	v.SetDefault("Sentry.DSN", "")
+	v.SetDefault("Sentry::Enabled", "false")
+	v.SetDefault("Sentry::DSN", "")
 
-	v.SetDefault("VaultConfig.Address", "http://localhost:8200")
-	v.SetDefault("VaultConfig.Token", "")
+	v.SetDefault("VaultConfig::Address", "http://localhost:8200")
+	v.SetDefault("VaultConfig::Token", "")
 
 	v.SetDefault("TuringEncryptionKey", "")
 
-	v.SetDefault("AlertConfig.Enabled", "false")
-	v.SetDefault("AlertConfig.GitLab.BaseURL", "https://gitlab.com")
-	v.SetDefault("AlertConfig.GitLab.Token", "")
-	v.SetDefault("AlertConfig.GitLab.ProjectID", "")
-	v.SetDefault("AlertConfig.GitLab.Branch", "master")
-	v.SetDefault("AlertConfig.GitLab.PathPrefix", "turing")
+	v.SetDefault("AlertConfig::Enabled", "false")
+	v.SetDefault("AlertConfig::GitLab::BaseURL", "https://gitlab.com")
+	v.SetDefault("AlertConfig::GitLab::Token", "")
+	v.SetDefault("AlertConfig::GitLab::ProjectID", "")
+	v.SetDefault("AlertConfig::GitLab::Branch", "master")
+	v.SetDefault("AlertConfig::GitLab::PathPrefix", "turing")
 
-	v.SetDefault("MLPConfig.MerlinURL", "")
-	v.SetDefault("MLPConfig.MLPURL", "")
-	v.SetDefault("MLPConfig.MLPEncryptionKey", "")
+	v.SetDefault("MLPConfig::MerlinURL", "")
+	v.SetDefault("MLPConfig::MLPURL", "")
+	v.SetDefault("MLPConfig::MLPEncryptionKey", "")
 
-	v.SetDefault("TuringUIConfig.AppDirectory", "")
-	v.SetDefault("TuringUIConfig.Homepage", "/turing")
+	v.SetDefault("TuringUIConfig::AppDirectory", "")
+	v.SetDefault("TuringUIConfig::Homepage", "/turing")
 
 	v.SetDefault("SwaggerFile", "openapi.yaml")
 	v.SetDefault("Experiment", map[string]interface{}{})

@@ -12,12 +12,12 @@ import (
 // EnsemblingJob holds the information required for an ensembling job to be done asynchronously
 type EnsemblingJob struct {
 	Model
-	Name            string       `json:"name"`
-	EnsemblerID     ID           `json:"ensembler_id"`
+	Name            string       `json:"name" validate:"required"`
+	EnsemblerID     ID           `json:"ensembler_id" validate:"required"`
 	ProjectID       ID           `json:"project_id"`
 	EnvironmentName string       `json:"environment_name"`
-	InfraConfig     *InfraConfig `json:"infra_config"`
-	JobConfig       *JobConfig   `json:"job_config"`
+	InfraConfig     *InfraConfig `json:"infra_config" validate:"required"`
+	JobConfig       *JobConfig   `json:"job_config" validate:"required"`
 	RetryCount      int          `json:"-" gorm:"default:0"`
 	Status          Status       `json:"status" gorm:"default:pending"`
 	Error           string       `json:"error"`
@@ -56,7 +56,7 @@ func (r *JobConfig) Scan(value interface{}) error {
 type InfraConfig struct {
 	ArtifactURI        string                       `json:"artifact_uri"`
 	EnsemblerName      string                       `json:"ensembler_name"`
-	ServiceAccountName string                       `json:"service_account_name"`
+	ServiceAccountName string                       `json:"service_account_name" validate:"required"`
 	Resources          *BatchEnsemblingJobResources `json:"resources"`
 }
 
@@ -76,11 +76,11 @@ func (r *InfraConfig) Scan(value interface{}) error {
 
 // BatchEnsemblingJobResources contains the resources delared to run the ensembling job.
 type BatchEnsemblingJobResources struct {
-	DriverCPURequest      string `json:"driver_cpu_request,omitempty"`
-	DriverMemoryRequest   string `json:"driver_memory_request,omitempty"`
-	ExecutorReplica       int32  `json:"executor_replica,omitempty"`
-	ExecutorCPURequest    string `json:"executor_cpu_request,omitempty"`
-	ExecutorMemoryRequest string `json:"executor_memory_request,omitempty"`
+	DriverCPURequest      string `json:"driver_cpu_request"`
+	DriverMemoryRequest   string `json:"driver_memory_request"`
+	ExecutorReplica       int32  `json:"executor_replica"`
+	ExecutorCPURequest    string `json:"executor_cpu_request"`
+	ExecutorMemoryRequest string `json:"executor_memory_request"`
 }
 
 // Status is the state of the finite machine ensembling job.

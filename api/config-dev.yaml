@@ -26,6 +26,15 @@ EnsemblingJobConfig:
       Limits:
         CPU: "1"
         Memory: 1Gi
+  DefaultConfigurations:
+    SparkConfigAnnotations:
+      "spark/spark.sql.execution.arrow.pyspark.enabled": "true"
+    BatchEnsemblingJobResources:
+      DriverCPURequest: "1"
+      DriverMemoryRequest: "1Gi"
+      ExecutorReplica: 2
+      ExecutorCPURequest: "1"
+      ExecutorMemoryRequest: "1Gi"
 KubernetesLabelConfigs:
   Environment: dev
 SparkAppConfig:
