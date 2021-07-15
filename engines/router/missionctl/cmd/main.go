@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
@@ -112,9 +116,37 @@ func main() {
 		http.Handle("/metrics", promhttp.Handler())
 	}
 
+	// Define custom HTTP server
+	httpServer := &http.Server{
+		Addr:    cfg.ListenAddress(),
+		Handler: http.DefaultServeMux,
+	}
+
+	// idleConnsClosed channel won't be close until
+	// Received an interrupt signal or error running server
+	idleConnsClosed := make(chan struct{})
+	go func() {
+		defer close(idleConnsClosed)
+
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		signal.Notify(sigint, syscall.SIGTERM)
+
+		<-sigint
+
+		err := httpServer.Shutdown(context.Background())
+		if err != nil {
+			log.Glob().Errorf("Failed to shutdown server: %s", err)
+		}
+	}()
+
 	// Serve
 	log.Glob().Infof("listening at port %d", cfg.Port)
-	if err := http.ListenAndServe(cfg.ListenAddress(), http.DefaultServeMux); err != nil {
+	err = httpServer.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
 		log.Glob().Errorf("Failed to start Turing Mission Control API: %s", err)
+		close(idleConnsClosed)
 	}
+
+	<-idleConnsClosed
 }

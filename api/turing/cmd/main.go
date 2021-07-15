@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/rs/cors"
@@ -135,11 +139,40 @@ func main() {
 		web.ServeReactApp(mux, cfg.TuringUIConfig.Homepage, cfg.TuringUIConfig.AppDirectory)
 	}
 
-	log.Infof("Listening on port %d", cfg.Port)
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins: cfg.AllowedOrigins,
 	})
-	if err := http.ListenAndServe(cfg.ListenAddress(), corsHandler.Handler(mux)); err != nil {
-		log.Errorf("Failed to start turing-api: %s", err)
+
+	// Define custom HTTP server
+	httpServer := &http.Server{
+		Addr:    cfg.ListenAddress(),
+		Handler: corsHandler.Handler(mux),
 	}
+
+	// idleConnsClosed channel won't be close until
+	// Received an interrupt signal or error running server
+	idleConnsClosed := make(chan struct{})
+	go func() {
+		defer close(idleConnsClosed)
+
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		signal.Notify(sigint, syscall.SIGTERM)
+
+		<-sigint
+
+		err := httpServer.Shutdown(context.Background())
+		if err != nil {
+			log.Errorf("Failed to shutdown server: %s", err)
+		}
+	}()
+
+	log.Infof("Listening on port %d", cfg.Port)
+	err = httpServer.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		log.Errorf("Failed to start turing-api: %s", err)
+		close(idleConnsClosed)
+	}
+
+	<-idleConnsClosed
 }
